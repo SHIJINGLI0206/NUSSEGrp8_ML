@@ -6,3 +6,4 @@ Environment Setup
   a. python 3.6.2
   b. PyQt5
   c. scikit-learn
+	d. python IDE(PyCharm community)

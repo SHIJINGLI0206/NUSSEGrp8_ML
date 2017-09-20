@@ -1,11 +1,11 @@
+import sys
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
-from ml_ui import Ui_Dialog
-import sys
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+
+from UI.ml_ui import Ui_Dialog
+
 
 class ML(QtWidgets.QDialog):
     def __init__(self, parent=None):

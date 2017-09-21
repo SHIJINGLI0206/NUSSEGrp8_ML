@@ -3,15 +3,22 @@ from DataManagement.dataManager import dataManager
 class dataManagerTest():
     def __init__(self):
         dt = dataManager()
-        dt.loadData('..\\pre_kc_house_data.csv', 'price', 70)
-        print 'DataFrame\n'
-        print dt.dataFrame
+        dt.loadData('..\\DataSet\\kc_house_data_Reduced.csv', ['id', 'date'], 'price', 0.75)
+        print 'Training Data\n'
+        print dt.X_train
 
-        print '\nOutData\n'
-        print dt.outputData
+        print '\nTraining Output\n'
+        print dt.y_train
 
-        print '\nInputData\n'
-        print dt.inputData
+        print 'Testing Data\n'
+        print dt.X_test
 
+        print '\nTesting Output\n'
+        print dt.y_test
+
+        dt.standardizeScaling()
+        print '\n\n'
+        print 'ScaledTrainingData\n'
+        print dt.X_trainScaled
 if __name__ == '__main__':
     dt = dataManagerTest()

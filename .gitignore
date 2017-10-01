@@ -11,3 +11,4 @@ test_seaborn.py
 .idea/workspace.xml
 DataManagement/__pycache__/
 UI/__pycache__/
+loading.gif

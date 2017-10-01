@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import Normalizer
 
+
 class dataManager:
 
     def __init__(self):
@@ -21,6 +22,7 @@ class dataManager:
             # load Dataset
             self.dataFrame = pd.read_csv(self.fileName)
             temp = self.dataFrame.copy()
+
             #self.inputData = pd.read_csv(self.fileName, usecols=lambda x: x not in [outputTag])
             temp.drop(listOfLabelsToDrop, axis=1, inplace=True)
             self.outputData = temp[outputTag]
@@ -34,9 +36,9 @@ class dataManager:
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.inputData, self.outputData, train_size=percentTrain)
 
         elif self._format == 'json':
-            print 'JSON format not supported'
+            print ('JSON format not supported')
         else:
-            print 'No format selected'
+            print ('No format selected')
 
     def standardizeScaling(self, X=None):
         if X is None:
@@ -50,10 +52,14 @@ class dataManager:
         else:
             return self.scaler.transform(X)
 
-    def normalize(self):
-        self.scaler = Normalizer().fit(self.X_train)  #scaler to be reapply on testing set later
-        self.X_trainScaled = self.scaler.transform(self.X_train)
-        return self.X_trainScaled
+    def normalize(self, X=None):
+        if X is None:
+            self.scaler = Normalizer().fit(self.X_train)  #scaler to be reapply on testing set later
+            self.X_trainScaled = self.scaler.transform(self.X_train)
+            return self.X_trainScaled
+        else:
+            scaler = Normalizer().fit(X)
+            return scaler.transform(X)
 
 
 

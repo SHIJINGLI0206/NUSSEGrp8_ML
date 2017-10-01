@@ -35,9 +35,9 @@ class dataManager:
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.inputData, self.outputData, train_size=percentTrain)
 
         elif self._format == 'json':
-            print 'JSON format not supported'
+            print ('JSON format not supported')
         else:
-            print 'No format selected'
+            print ('No format selected')
 
     def standardizeScaling(self):
         self.scaler = StandardScaler().fit(self.X_train)  #scaler to be reapply on testing set later

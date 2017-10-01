@@ -1,0 +1,13 @@
+image.jpg
+kc_house_data.csv
+kc_house_data_r.csv
+test_flask_matplot.py
+test_path.py
+test_plt.py
+test_qt_plt.py
+test_seaborn.py
+.idea/SG5236 MacLearn.iml
+.idea/misc.xml
+.idea/workspace.xml
+DataManagement/__pycache__/
+UI/__pycache__/

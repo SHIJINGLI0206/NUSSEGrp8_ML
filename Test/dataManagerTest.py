@@ -1,5 +1,5 @@
 from DataManagement.dataManager import dataManager
-from Models.LearnModels import (LinearRegModel, r2_score, LogRegModel)
+from Models.LearnModels import *
 
 
 class dataManagerTest():

@@ -16,6 +16,15 @@ class dataManager:
     def setFormat(self, format):
         self._format = format
 
+    def categorizeMultiClass(self, data):
+        self.outputData = data
+        minValue = self.outputData.min()
+        range = self.outputData.max() - self.outputData.min()
+        numOfClasses = 10
+        interval = range/numOfClasses
+        self.outputData = self.outputData.sub(minValue).floordiv(interval)
+        return self.outputData
+
     def loadData(self, fileName, listOfLabelsToDrop, outputTag, percentTrain):
         self.fileName = fileName
         if self._format == 'csv':
@@ -25,7 +34,9 @@ class dataManager:
 
             #self.inputData = pd.read_csv(self.fileName, usecols=lambda x: x not in [outputTag])
             temp.drop(listOfLabelsToDrop, axis=1, inplace=True)
-            self.outputData = temp[outputTag]
+
+            # Categorize output into different classes
+            self.outputData = self.categorizeMultiClass(temp[outputTag])
             #print self.outputData
 
             temp.drop(outputTag, axis=1, inplace=True)

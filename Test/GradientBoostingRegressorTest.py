@@ -11,7 +11,7 @@ from sklearn.preprocessing import scale
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 
-data = pd.read_csv("DataSet\kc_house_data.csv")
+data = pd.read_csv("..\\DataSet\\kc_house_data.csv")
 
 train1 = data.drop(['id', 'price'],axis=1)
 

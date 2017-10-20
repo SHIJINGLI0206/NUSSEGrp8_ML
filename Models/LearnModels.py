@@ -1,6 +1,27 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import mpl_toolkits
+from sklearn.cross_validation import train_test_split
+from sklearn.linear_model import LinearRegression
+
+from sklearn import ensemble
+from sklearn.preprocessing import scale
+from sklearn.decomposition import PCA
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from datetime import datetime
+
+class GradientBoostingRegressor:
+
+    def __init__(self, x_train, y_train, mn_estimators, mmax_depth, mmin_samples_split, mlearning_rate, mloss):
+        self.clf = ensemble.GradientBoostingRegressor(n_estimators = mn_estimators, max_depth = mmax_depth, min_samples_split = mmin_samples_split, learning_rate = mlearning_rate, loss = mloss)
+        self.clf.fit(x_train, y_train)
+
+    def predict(self, x_test):
+        return self.clf.predict(x_test)
+
+    def score(self, x_test,y_test):
+        return self.clf.score(x_test,y_test)
 
 class LinearRegModel:
 

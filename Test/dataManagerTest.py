@@ -18,7 +18,7 @@ class dataManagerTest():
         # print '\nTesting Output\n'
         # print dt.y_test
 
-        XscaledData = dt.standardizeScaling()
+        #XscaledData = dt.standardizeScaling()
         # print '\n\n'
         # print 'ScaledTrainingData\n'
         # print XscaledData
@@ -26,8 +26,8 @@ class dataManagerTest():
         print ('\n\n')
         print ('Start training data in model')
 
-        modelA = LinearRegModel(XscaledData, dt.y_train)
-        predictedY, RMSE, w0, w1 = modelA.predict(dt.standardizeScaling(dt.X_test), dt.y_test)
+        modelA = LinearRegModel(dt.X_train, dt.y_train)
+        predictedY, RMSE, w0, w1 = modelA.predict(dt.X_test, dt.y_test)
         score = modelA.score(dt.X_test, dt.y_test)
 
         print ('\nPredicted prices vs Actual prices\n')

@@ -54,9 +54,10 @@ class dataManager:
             temp.drop(listOfLabelsToDrop, axis=1, inplace=True)
 
             # Categorize output into different classes
-            self.outputData = self.categorizeMultiClass(temp[outputTag])
+            #self.outputData = self.categorizeMultiClass(temp[outputTag])
             #print self.outputData
 
+            self.outputData = temp[outputTag]
             temp.drop(outputTag, axis=1, inplace=True)
             self.inputData = temp
             #print self.inputData

@@ -1,12 +1,14 @@
 import sys
 import ctypes
-from PyQt5 import (QtWidgets, QtGui)
+from PyQt5 import (QtWidgets, QtGui, QtCore)
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog)
-from PyQt5.QtGui import (QPainter,QMovie)
+from PyQt5.QtGui import *
 from PyQt5.Qt import (QWidget, QLabel,QSizePolicy,QVBoxLayout, QProgressDialog, QPixmap)
 from UI.ml_ui import Ui_MainWindow
 from DataManagement.feature_ranking import FeatureRanking
+from DataManagement.dataManager import *
+from DataManagement.featureModel import *
 
 class PopUp(QWidget):
     def __init__(self):
@@ -43,6 +45,7 @@ class ML(QMainWindow):
     def init_ui(self):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowIcon(QtGui.QIcon('Images\\house.png'))
        # addDockWidget(Qt.RightDockWidgetArea,self.ui.dockWidget)
 
         # init widget size
@@ -50,11 +53,18 @@ class ML(QMainWindow):
         screen_height = ctypes.windll.user32.GetSystemMetrics(1)
         self.ui.dw_right.setMinimumWidth(screen_width - self.ui.dw_left.width() - 10)
         self.ui.sw_content.setMinimumWidth(screen_width - self.ui.dw_left.width() - 40)
-        self.ui.sw_content.setMinimumHeight(screen_height - 230)
+        self.ui.sw_content.setMinimumHeight(screen_height - 200)
 
+        # page 1 content size
         self.ui.lb_filename.setMinimumWidth(self.ui.sw_content.width() - 30)
-        self.ui.lb_features.setMinimumWidth(self.ui.sw_content.width() - 30)
-        self.ui.lb_features.setMinimumHeight(self.ui.sw_content.height() - 200)
+        self.ui.view_data.setMinimumWidth(self.ui.sw_content.width() - 20)
+        self.ui.view_data.setMinimumHeight(700)
+
+        self.ui.view_feature.setMinimumHeight( self.ui.sw_content.height() - self.ui.view_data.height() - 70 )
+        self.ui.view_feature.setMinimumWidth(300)
+        self.ui.lb_feature_rank.setMinimumHeight(self.ui.view_feature.height())
+        self.ui.lb_feature_rank.setMinimumWidth(self.ui.sw_content.width() - self.ui.view_feature.width() - 30)
+
         self.showMaximized()
 
         # connect signal with slot
@@ -66,21 +76,35 @@ class ML(QMainWindow):
 
     @pyqtSlot()
     def load_data(self):
-
         self.ui.sw_content.setCurrentIndex(0)
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
+
         fileName, _ = QFileDialog.getOpenFileName(self, "Load Training Data", "",
-                                                  "All Files (*);;Excel (*.csv);;Text (*.txt)", options=options)
+                                                  "All (*.*);;Excel (*.csv);", options=options)
         if fileName:
             self.ui.lb_filename.setText('Load File: ' + fileName)
-            feature_ranking = FeatureRanking(fileName)
-           # feature_ranking.do_rank()
+            self.load_house_data(fileName)
 
             pixmap = QPixmap('Images\\feature_ranking.jpg')
             w = 1200
-            h = 800
-            self.ui.lb_features.setPixmap(pixmap.scaled(w,h))
+            h = 600
+            self.ui.lb_feature_rank.setPixmap(pixmap.scaled(w,h))
+
+    def load_house_data(self,filename):
+        dm = dataManager()
+        header_data, list_data = dm.loadRawData(filename, 4)
+        model_data = HousePriceModel(self, header_data, list_data)
+        self.ui.view_data.setModel(model_data)
+
+        headers_feature = ['', 'Features']
+        list_feature = [[0,item] for item in header_data]
+        model_feature = FeatureModel(self, headers_feature, list_feature)
+        self.ui.view_feature.setModel(model_feature)
+        self.ui.view_feature.setColumnWidth(0, 50)
+
+    def load_feature_importance(self,filename):
+        pass
 
 
 
@@ -109,7 +133,8 @@ class ML(QMainWindow):
         self.w.show()'''
 
 
-
+    def list_features(self):
+        pass
 
     @pyqtSlot()
     def get_res(self):

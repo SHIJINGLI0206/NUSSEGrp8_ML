@@ -7,11 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>1824</width>
-    <height>1209</height>
+    <height>1465</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>House Price Prediction by Machine Learning</string>
+  </property>
+  <property name="iconSize">
+   <size>
+    <width>64</width>
+    <height>64</height>
+   </size>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -43,58 +49,15 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>410</y>
-       <width>531</width>
-       <height>681</height>
+       <y>620</y>
+       <width>561</width>
+       <height>241</height>
       </rect>
      </property>
      <property name="title">
       <string>Setting</string>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>140</y>
-        <width>461</width>
-        <height>47</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Algorithm</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <item>
-          <property name="text">
-           <string>Linear Regression</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Logistic Regression</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
         <x>12</x>
@@ -145,78 +108,135 @@
        </item>
       </layout>
      </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>141</y>
+        <width>136</width>
+        <height>39</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Algorithm</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox">
+      <property name="geometry">
+       <rect>
+        <x>149</x>
+        <y>141</y>
+        <width>411</width>
+        <height>45</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <item>
+       <property name="text">
+        <string>GradientBoostingRegressor</string>
+       </property>
+      </item>
+     </widget>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>10</y>
-       <width>202</width>
-       <height>326</height>
+       <y>0</y>
+       <width>551</width>
+       <height>561</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QPushButton" name="pb_load">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Load Data</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pb_train">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Train</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pb_test">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Test</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="title">
+      <string>SystemModel</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>50</y>
+        <width>251</width>
+        <height>351</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="pb_load">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Load Data</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pb_train">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Build Model</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pb_test">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Verify Model</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -234,10 +254,10 @@
     <widget class="QStackedWidget" name="sw_content">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>30</x>
        <y>0</y>
-       <width>851</width>
-       <height>891</height>
+       <width>831</width>
+       <height>1281</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -253,25 +273,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="page">
-      <widget class="QLabel" name="lb_features">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>811</width>
-         <height>701</height>
-        </rect>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::Box</enum>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
       <widget class="QLabel" name="lb_filename">
        <property name="geometry">
         <rect>
@@ -295,6 +296,54 @@
        <property name="text">
         <string>Load File :</string>
        </property>
+      </widget>
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>50</y>
+         <width>781</width>
+         <height>411</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="vl_1">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetFixedSize</enum>
+        </property>
+        <item>
+         <widget class="QTableView" name="view_data"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="hl_1">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetFixedSize</enum>
+          </property>
+          <item>
+           <widget class="QTableView" name="view_feature">
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lb_feature_rank">
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QWidget" name="page_2">

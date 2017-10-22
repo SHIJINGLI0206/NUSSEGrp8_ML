@@ -1,7 +1,7 @@
 #----------------------- DataManager -------------------#
 # This class is the interface for dataset loading,      #
 # feature scaling, manipulation, reshaping etc          #
-
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -24,6 +24,24 @@ class dataManager:
         interval = range/numOfClasses
         self.outputData = self.outputData.sub(minValue).floordiv(interval)
         return self.outputData
+
+    def loadRawData(self,fileName, rows):
+        self.fileName = fileName
+        _,ext = os.path.splitext(fileName)
+        headers =[]
+        list_feature= []
+        if ext == '.csv':
+            df = pd.read_csv(fileName,header=0)
+            headers = list(df.columns.values)
+
+
+            for rw in df.itertuples(index=0):
+                list_feature.append(list(rw))
+                rows -= 1
+                if (rows<0):
+                    break
+        return headers, list_feature
+
 
     def loadData(self, fileName, listOfLabelsToDrop, outputTag, percentTrain):
         self.fileName = fileName

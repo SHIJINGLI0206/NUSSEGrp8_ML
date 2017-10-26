@@ -10,10 +10,12 @@ from sklearn.decomposition import PCA
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from datetime import datetime
+import numpy as np
+
 
 class GradientBoostingRegressor:
-
     def __init__(self, x_train, y_train, mn_estimators, mmax_depth, mmin_samples_split, mlearning_rate, mloss):
+        self.mn_estimators = mn_estimators
         self.clf = ensemble.GradientBoostingRegressor(n_estimators = mn_estimators, max_depth = mmax_depth, min_samples_split = mmin_samples_split, learning_rate = mlearning_rate, loss = mloss)
         self.clf.fit(x_train, y_train)
 
@@ -23,8 +25,20 @@ class GradientBoostingRegressor:
     def score(self, x_test,y_test):
         return self.clf.score(x_test,y_test)
 
-class LinearRegModel:
+    def feature_importance(self):
+        return self.clf.feature_importances_
 
+    def test_score(self,x_test, y_test):
+        test_score = np.zeros((self.mn_estimators,), dtype=np.float64)
+        for i, y_pred in enumerate(self.clf.staged_predict(x_test)):
+            test_score[i] = self.clf.loss_(y_test, y_pred)
+        return test_score
+
+    def train_score(self):
+        return self.clf.train_score_
+
+
+class LinearRegModel:
     def __init__(self, X, y):
         self.regr = linear_model.LinearRegression()
         self.regr.fit(X,y.as_matrix())

@@ -12,3 +12,4 @@ test_seaborn.py
 DataManagement/__pycache__/
 UI/__pycache__/
 loading.gif
+GradientBoostingRegressorTest.py

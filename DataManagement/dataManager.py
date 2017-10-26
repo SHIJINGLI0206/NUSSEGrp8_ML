@@ -12,6 +12,10 @@ class dataManager:
 
     def __init__(self):
         self._format = 'csv'
+        self.X_train = None
+        self.y_train = None
+        self.X_test = None
+        self.y_test = None
 
     def setFormat(self, format):
         self._format = format
@@ -25,6 +29,22 @@ class dataManager:
         self.outputData = self.outputData.sub(minValue).floordiv(interval)
         return self.outputData
 
+    def loadPredictData(self,fileName, listOfLabelsToDrop, outputTag, percentTrain):
+        self.fileName = fileName
+        if self._format == 'csv':
+            # load Dataset
+            self.dataFrame = pd.read_csv(self.fileName)
+            temp = self.dataFrame.copy()
+            temp.drop(listOfLabelsToDrop, axis=1, inplace=True)
+            #temp.drop(outputTag, axis=1, inplace=True)
+            self.inputData = temp
+
+            # Split into training and testing dataset
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.inputData, self.dataFrame[outputTag],
+                                                                                    train_size=percentTrain)
+        elif self._format == 'json':
+            print('JSON format not supported')
+
     def loadRawData(self,fileName, rows):
         self.fileName = fileName
         _,ext = os.path.splitext(fileName)
@@ -33,8 +53,6 @@ class dataManager:
         if ext == '.csv':
             df = pd.read_csv(fileName,header=0)
             headers = list(df.columns.values)
-
-
             for rw in df.itertuples(index=0):
                 list_feature.append(list(rw))
                 rows -= 1

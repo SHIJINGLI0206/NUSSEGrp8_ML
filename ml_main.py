@@ -9,38 +9,70 @@ from UI.ml_ui import Ui_MainWindow
 from DataManagement.feature_ranking import FeatureRanking
 from DataManagement.dataManager import *
 from DataManagement.featureModel import *
+import math
+from Models.LearnModels import *
+import numpy as np
 
-class PopUp(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
+class FeatureRankingThread(QThread):
+    def __init__(self,x_train,y_train):
+        QThread.__init__(self)
+        self.x_train = x_train
+        self.y_train = y_train
+        self.feature_importance = []
 
-    def paintEvent(self, QPaintEvent):
-        doc = QPainter(self)
-        doc.drawLine(0,0,100,100)
+    def __del__(self):
+        self.quit()
 
-    def showEvent(self, QShowEvent):
-        self.movie_screen = QLabel()
-        self.movie_screen.setSizePolicy(QSizePolicy.Expanding,
-            QSizePolicy.Expanding)
-        self.movie_screen.setAlignment(Qt.AlignCenter)
+    def run(self):
+        # calculate feature importance use user se
+        try:
+            model_gbr = GradientBoostingRegressor(self.x_train, self.y_train, 500, 5, 2, 0.1, 'ls')
+            self.feature_importance.clear()
+            self.feature_importance = model_gbr.feature_importance()
+            # make importances relative to max importance
+            self.feature_importance = 100.0 * (self.feature_importance / self.feature_importance.max())
+        except Exception as e:
+            print('Error: ',e)
 
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.movie_screen)
-        self.setLayout(main_layout)
+class BuildModelThread(QThread):
+    def __init__(self,x_train,y_train):
+        QThread.__init__(self)
+        self.x_train = x_train
+        self.y_train = y_train
+        self.prediction_model = None
 
-        self.moive = QMovie('Images\\loading.gif', QByteArray(),self)
-        self.movie.setCacheMode(QMovie.CacheAll)
-        self.movie.setSpeed(100)
-        self.movie_screen.setMovie(self.movie)
-        self.movie.start()
+    def __del__(self):
+        self.quit()
+        self.wait()
 
-
-
+    def run(self):
+        #build machine learning model
+        try:
+            self.prediction_model = GradientBoostingRegressor(self.x_train, self.y_train, 500, 5, 2, 0.1, 'ls')
+        except Exception as e:
+            print('Error: ',e)
 
 class ML(QMainWindow):
     def __init__(self, parent=None):
         super(ML,self).__init__(parent=None)
         self.init_ui()
+
+        self.raw_features = []
+        self.selected_features = []
+        self.drop_features = []
+        self.x_test = []
+        self.y_test = []
+        self.y_pred = []
+        self.thread_feature_ranking = None
+        self.thread_model_building = None
+        self.prediction_model = None
+
+        self.file_name = ''
+        self.init_connection()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.thread_feature_ranking.exit()
+
 
     def init_ui(self):
         self.ui = Ui_MainWindow()
@@ -65,14 +97,38 @@ class ML(QMainWindow):
         self.ui.lb_feature_rank.setMinimumHeight(self.ui.view_feature.height())
         self.ui.lb_feature_rank.setMinimumWidth(self.ui.sw_content.width() - self.ui.view_feature.width() - 30)
 
-        self.showMaximized()
+        # page 2 content size
+        self.ui.lb_train.setMinimumWidth( self.ui.sw_content.width() - 20 )
+        self.ui.lb_train.setMinimumHeight(500)
 
-        # connect signal with slot
-        self.ui.pb_load.clicked.connect(self.load_data)
-        self.ui.pb_train.clicked.connect(self.train)
-        self.ui.pb_test.clicked.connect(self.get_res)
+        # page 3 content size
+        self.ui.lb_score.setMinimumWidth(self.ui.sw_content.width() - 20)
+        self.ui.lb_deviance.setMinimumWidth(self.ui.sw_content.width() - 20)
+        self.ui.lb_deviance.setMinimumHeight(800)
+        self.ui.view_prediction_res.setMinimumHeight(700)
+        self.ui.view_prediction_res.setMinimumWidth(self.ui.sw_content.width() - 20)
+
+        # page 4 content size
+        self.ui.view_prediction.setMinimumWidth(self.ui.sw_content.width() - 20)
+
+        self.showMaximized()
         self.show()
 
+    def init_connection(self):
+        # connect signal with slot
+        self.ui.pb_load.clicked.connect(self.load_data)
+        self.ui.pb_feature_rank.clicked.connect(self.do_feature_ranking)
+        self.ui.pb_train.clicked.connect(self.build_model)
+        self.ui.pb_test.clicked.connect(self.validate_model)
+        self.ui.pb_predict.clicked.connect(self.house_price_prediction)
+        self.ui.pb_predict_one.clicked.connect(self.calc_price)
+
+    def show_animate(self):
+        currentFrame = self.movie.currentPixmap()
+        if self.ui.sw_content.currentIndex() == 0:
+            self.ui.lb_feature_rank.setPixmap(currentFrame)
+        elif self.ui.sw_content.currentIndex() == 1:
+            self.ui.lb_train.setPixmap(currentFrame)
 
     @pyqtSlot()
     def load_data(self):
@@ -83,64 +139,174 @@ class ML(QMainWindow):
         fileName, _ = QFileDialog.getOpenFileName(self, "Load Training Data", "",
                                                   "All (*.*);;Excel (*.csv);", options=options)
         if fileName:
+            # load house data
+            self.file_name = fileName
             self.ui.lb_filename.setText('Load File: ' + fileName)
             self.load_house_data(fileName)
 
-            pixmap = QPixmap('Images\\feature_ranking.jpg')
-            w = 1200
-            h = 600
-            self.ui.lb_feature_rank.setPixmap(pixmap.scaled(w,h))
-
     def load_house_data(self,filename):
         dm = dataManager()
-        header_data, list_data = dm.loadRawData(filename, 4)
-        model_data = HousePriceModel(self, header_data, list_data)
+        self.raw_features, list_data = dm.loadRawData(filename, 4)
+        model_data = HousePriceModel(self, self.raw_features, list_data)
         self.ui.view_data.setModel(model_data)
 
         headers_feature = ['', 'Features']
-        list_feature = [[0,item] for item in header_data]
-        model_feature = FeatureModel(self, headers_feature, list_feature)
-        self.ui.view_feature.setModel(model_feature)
+        list_feature = [[1,item] for item in self.raw_features]
+        self.model_feature = FeatureModel(self, headers_feature, list_feature)
+        self.ui.view_feature.setModel(self.model_feature)
         self.ui.view_feature.setColumnWidth(0, 50)
 
-    def load_feature_importance(self,filename):
-        pass
+    @pyqtSlot()
+    def finish_feature_ranking(self):
+        # stop waiting indicator and show feature importance
+        feature_importance = self.thread_feature_ranking.feature_importance
+        sorted_idx = np.argsort(feature_importance)
+        pos = np.arange(sorted_idx.shape[0]) + .5
+        plt.barh(pos, feature_importance[sorted_idx], align='center')
 
+        feature_names = np.array(self.selected_features)
 
+        plt.yticks(pos, feature_names[sorted_idx])
+        plt.xlabel('Relative Importance')
+        plt.title('Feature Importance Ranking')
+        plt.savefig('Images\\feature_ranking.jpg')
+        plt.close()
+
+        self.thread_feature_ranking.quit()
+        self.movie.frameChanged.disconnect()
+        self.movie.stop()
+        self.ui.lb_feature_rank.clear()
+        pixmap = QPixmap('Images\\feature_ranking.jpg')
+        self.ui.lb_feature_rank.setPixmap(pixmap.scaled(1200, 800))
+
+    def start_waiting_indicator(self):
+        # show waiting indicator
+        self.movie = QMovie('Images//loading.gif')
+        self.movie.frameChanged.connect(self.show_animate)
+        self.movie.start()
 
     @pyqtSlot()
-    def train(self):
+    def do_feature_ranking(self):
+        if len(self.file_name) == 0:
+            return
+
+        self.start_waiting_indicator()
+
+        #check user selected features
+        self.drop_features.clear()
+        self.selected_features.clear()
+        for i in range(len(self.model_feature.list_feature)):
+            if self.model_feature.list_feature[i][0]:
+                self.selected_features.append(self.model_feature.list_feature[i][1])
+            else:
+                self.drop_features.append(self.model_feature.list_feature[i][1])
+
+        # start a new thread to do feature ranking
+        dt = dataManager()
+        radio = int(self.ui.sb_train_ratio.value()) / 100
+        dt.loadPredictData(self.file_name, self.drop_features, 'price',  radio)
+        self.thread_feature_ranking = FeatureRankingThread(dt.X_train, dt.y_train)
+        self.thread_feature_ranking.finished.connect(self.finish_feature_ranking)
+        self.thread_feature_ranking.start()
+
+    @pyqtSlot()
+    def finish_model_building(self):
+        self.prediction_model = self.thread_model_building.prediction_model
+        self.thread_model_building.quit()
+        self.movie.frameChanged.disconnect()
+        self.movie.stop()
+        self.ui.lb_train_tip.setText('Model has been built. Validate model next step.')
+
+    @pyqtSlot()
+    def build_model(self):
+        if len(self.file_name) == 0:
+            return
         self.ui.sw_content.setCurrentIndex(1)
 
-        self.progressDlg = QProgressDialog(self)
-        self.progressDlg.setCancelButton("&Cancel")
-        self.progressDlg.setRange(0,100)
-        for i in range(0,100):
-            self.progressDlg.setValue(i)
-            self.progressDlg.setLabelText("Training ... ")
-            QCoreApplication.processEvents()
-            if self.progressDlg.wasCanceled():
-                break
-            QThread.sleep(1)
+        self.start_waiting_indicator()
 
-       # self.progressDlg.close()
+        #check user selected features
+        self.drop_features.clear()
+        self.selected_features.clear()
+        for i in range(len(self.model_feature.list_feature)):
+            if self.model_feature.list_feature[i][0]:
+                self.selected_features.append(self.model_feature.list_feature[i][1])
+            else:
+                self.drop_features.append(self.model_feature.list_feature[i][1])
 
+        # start a new thread to do training
+        dt = dataManager()
+        radio = int(self.ui.sb_train_ratio.value()) / 100
+        dt.loadPredictData(self.file_name, self.drop_features, 'price',  radio)
+        self.x_test = dt.X_test
+        self.y_test = dt.y_test
+        self.thread_model_building = BuildModelThread(dt.X_train, dt.y_train)
+        self.thread_model_building.finished.connect(self.finish_model_building)
+        self.thread_model_building.start()
 
-
-        '''self.w = PopUp()
-        self.w.setGeometry(QRect(800,500,300,300))
-        self.w.setWindowFlag(Qt.FramelessWindowHint)
-        self.w.show()'''
-
-
-    def list_features(self):
-        pass
 
     @pyqtSlot()
-    def get_res(self):
+    def validate_model(self):
+        if len(self.selected_features) == 0 or not self.prediction_model :
+            return
+        # calc y_pred and score
         self.ui.sw_content.setCurrentIndex(2)
-        # pixmap = QPixmap('image.jpg')
-       # self.ui.lb_img.setPixmap(pixmap)
+        self.y_pred = self.prediction_model.predict(self.x_test)
+        score = self.prediction_model.score(self.x_test,self.y_test)
+
+        self.ui.lb_score.setText('Prediction Score : %s' % score)
+
+        # compute test set deviance
+        test_score = self.prediction_model.test_score(self.x_test,self.y_test)
+        train_score = self.prediction_model.train_score()
+
+        plt.title('Deviance')
+        plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, train_score, 'b-',
+                 label='Training Set Deviance')
+        plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, test_score, 'r-',
+                 label='Test Set Deviance')
+        plt.legend(loc='upper right')
+        plt.xlabel('Boosting Iterations')
+        plt.ylabel('Deviance')
+        plt.savefig('Images\\divance.jpg')
+
+        pixmap = QPixmap('Images\\divance.jpg')
+        self.ui.lb_deviance.setPixmap(pixmap.scaled(1200, 800))
+
+        #prediction data
+        headers = ['House Price', 'Prediction Price', 'Difference']
+        list_data = []
+        for i in range(10):
+            list_data.append([self.y_test.values[i], self.y_pred[i]])
+        model_validation = ValidationModel(self,headers,list_data)
+        self.ui.view_prediction_res.setModel(model_validation)
+
+    @pyqtSlot()
+    def house_price_prediction(self):
+        self.ui.sw_content.setCurrentIndex(3)
+
+        headers = ['Predicted','Price']
+        for x in self.selected_features:
+            headers.append(x)
+
+        list_data = [''] * len(headers)
+        model_prediction = PredictionModel(self, headers,list_data)
+        self.ui.view_prediction.setModel(model_prediction)
+        self.ui.view_prediction.setColumnWidth(0,200)
+
+    @pyqtSlot()
+    def calc_price(self):
+        m = self.ui.view_prediction.model()
+        user_data = m.list_data[2:]
+        x_test_user = pd.DataFrame([user_data],columns=self.selected_features)
+        y_pred_user = self.prediction_model.predict(x_test_user)
+        m.update_predicted_price(y_pred_user[0])
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

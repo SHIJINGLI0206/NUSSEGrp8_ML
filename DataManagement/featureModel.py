@@ -64,17 +64,89 @@ class FeatureModel(QAbstractTableModel):
         return value
 
     def setData(self, index, value, role=None):
-        if role == Qt.CheckStateRole and index.column() == 0:
-            if value == Qt.Checked:
-                self.list_feature[index.row()][0] = 1
-            else:
-                self.list_feature[index.row()][0] = 0
-                self.dataChanged.emit(index,index)
+        if role == Qt.CheckStateRole and index.column() == 0 :
+            self.list_feature[index.row()][0] = 1 - self.list_feature[index.row()][0]
+            self.dataChanged.emit(index,index)
             return True
+        return False
 
     def flags(self, index):
         if index.column() == 0:
             return Qt.ItemIsEnabled | Qt.ItemIsEditable | Qt.ItemIsUserCheckable | Qt.ItemIsSelectable
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+
+
+
+class ValidationModel(QAbstractTableModel):
+    def __init__(self,parent, headers, list_data, *args):
+        QAbstractTableModel.__init__(self,parent,*args)
+        self.list_data = list_data
+        self.headers = headers
+
+    def headerData(self, p_int, Orientation, role=None):
+        if Orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self.headers[p_int]
+        return None
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return len(self.list_data)
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return len(self.headers)
+
+    def data(self, index, role=None):
+        if not index.isValid():
+            return None
+        value = None
+        if role == Qt.DisplayRole:
+            if index.column() == 2:
+                value = float(self.list_data[index.row()][1]) - float(self.list_data[index.row()][0])
+            else:
+                value = str(self.list_data[index.row()][index.column()])
+        return value
+
+
+class PredictionModel(QAbstractTableModel):
+    def __init__(self,parent, headers, list_data, *args):
+        QAbstractTableModel.__init__(self,parent,*args)
+        self.list_data = list_data
+        self.headers = headers
+
+    def headerData(self, p_int, Orientation, role=None):
+        if Orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self.headers[p_int]
+        return None
+
+    def rowCount(self, parent=None, *args, **kwargs):
+        return 1
+
+    def columnCount(self, parent=None, *args, **kwargs):
+        return len(self.headers)
+
+    def data(self, index, role=None):
+        if not index.isValid():
+            return None
+        value = None
+        if role == Qt.DisplayRole:
+            value = str(self.list_data[index.column()])
+        return value
+
+    def setData(self, index, value, role=None):
+        if role == Qt.ItemIsEditable or role == Qt.DisplayRole:
+            self.list_data[index.column()] = value if len(value)> 0 else 0
+            self.dataChanged.emit(index,index)
+            return True
+        return False
+
+    def flags(self, index):
+        if index.column() == 0:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        else:
+            return Qt.ItemIsEnabled | Qt.ItemIsEditable | Qt.ItemIsSelectable
+
+    def update_predicted_price(self,price):
+        self.list_data[0] = str(price)
+        self.dataChanged.emit(self.createIndex(0,0),self.createIndex(0,self.columnCount()))
+
 

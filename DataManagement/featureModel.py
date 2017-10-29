@@ -101,7 +101,10 @@ class ValidationModel(QAbstractTableModel):
         value = None
         if role == Qt.DisplayRole:
             if index.column() == 2:
-                value = float(self.list_data[index.row()][1]) - float(self.list_data[index.row()][0])
+                value = format((float(self.list_data[index.row()][0]) - float(self.list_data[index.row()][1])),'.2f')
+            elif index.column() == 3:
+                tmp = abs(float(self.list_data[index.row()][0]) - float(self.list_data[index.row()][1])) * 100 / float(self.list_data[index.row()][0])
+                value = ('%s' % format(tmp,'.2f')) + '%'
             else:
                 value = str(self.list_data[index.row()][index.column()])
         return value
@@ -130,6 +133,8 @@ class PredictionModel(QAbstractTableModel):
         value = None
         if role == Qt.DisplayRole:
             value = str(self.list_data[index.column()])
+            if index.column() == 0 and len(self.list_data[index.column()])>0:
+                value = format(float(value),'.2f')
         return value
 
     def setData(self, index, value, role=None):

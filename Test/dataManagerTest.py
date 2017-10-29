@@ -24,16 +24,20 @@ class dataManagerTest():
         # print XscaledData
 
         print ('\n\n')
-        print ('Start training data in model')
+        print ('Start training data in model (Linear Regression)')
 
         modelA = LinearRegModel(dt.X_train, dt.y_train)
         predictedY, RMSE, w0, w1 = modelA.predict(dt.X_test, dt.y_test)
         score = modelA.score(dt.X_test, dt.y_test)
 
-        print ('\nPredicted prices vs Actual prices\n')
-        print (predictedY, dt.y_test.values)
         print ('\nScore')
         print (score)
+
+        print ('\nPredicted prices vs Actual prices\n')
+        for i in range(0, len(predictedY)):
+            print(" Predicted = " + str(predictedY[i]) + " Value = " + str(dt.y_test.values[i]) + " Difference[%] = " + str(
+                (dt.y_test.values[i] - predictedY[i]) * 100 / dt.y_test.values[i]))
+            #print (" Predicted = " + str(predictedY[i]), dt.y_test.values[i])
 
         print("Mean squared error: %.2f" %RMSE)
         print("Intercept: %s" %w0)
@@ -42,7 +46,7 @@ class dataManagerTest():
         # Explained variance score: 1 is perfect prediction
         print('Variance score: %.2f' % r2_score(dt.y_test, predictedY))
 
-
+    if 0:
         ###########################################################################
         #Test logistic regression
         ###########################################################################

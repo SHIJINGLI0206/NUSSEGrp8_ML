@@ -42,7 +42,7 @@ for i in range(1, 10):
 """
 
 gra = lm.GradientBoostingRegressor(x_train, y_train, 400, 5, 2, 0.1, 'ls')
-print "GradientBoostingRegressor score= " + str(gra.score(x_test, y_test))
+print ("GradientBoostingRegressor score= " + str(gra.score(x_test, y_test)))
 
 """"
 y_test = y_test[:5]
@@ -52,6 +52,6 @@ predicted = gra.predict(x_test)
 
 
 for i in range(0, len(x_test)):
-    print " Predicted = " + str(predicted[i]) + " Value = " + str(y_test.values[i]) + " delta = " + str( (y_test.values[i] - predicted[i]) * 100 / y_test.values[i] )
+    print (" Predicted = " + str(predicted[i]) + " Value = " + str(y_test.values[i]) + " Difference[%] = " + str( (y_test.values[i] - predicted[i]) * 100 / y_test.values[i] ))
 
 

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QMainWindow, QFileDialog)
 from PyQt5.QtGui import *
 from PyQt5.Qt import (QWidget, QLabel,QSizePolicy,QVBoxLayout, QProgressDialog, QPixmap)
 from UI.ml_ui import Ui_MainWindow
-from DataManagement.feature_ranking import FeatureRanking
+#from DataManagement.feature_ranking import FeatureRanking
 from DataManagement.dataManager import *
 from DataManagement.featureModel import *
 import math
@@ -26,7 +26,7 @@ class FeatureRankingThread(QThread):
     def run(self):
         # calculate feature importance use user se
         try:
-            model_gbr = GradientBoostingRegressor(self.x_train, self.y_train, 500, 5, 2, 0.1, 'ls')
+            model_gbr = GradientBoostingRegressor(self.x_train, self.y_train, 400, 5, 2, 0.1, 'ls')
             self.feature_importance.clear()
             self.feature_importance = model_gbr.feature_importance()
             # make importances relative to max importance
@@ -48,7 +48,7 @@ class BuildModelThread(QThread):
     def run(self):
         #build machine learning model
         try:
-            self.prediction_model = GradientBoostingRegressor(self.x_train, self.y_train, 500, 5, 2, 0.1, 'ls')
+            self.prediction_model = GradientBoostingRegressor(self.x_train, self.y_train, 400, 5, 2, 0.1, 'ls')
         except Exception as e:
             print('Error: ',e)
 
@@ -103,13 +103,14 @@ class ML(QMainWindow):
 
         # page 3 content size
         self.ui.lb_score.setMinimumWidth(self.ui.sw_content.width() - 20)
-        self.ui.lb_deviance.setMinimumWidth(self.ui.sw_content.width() - 20)
-        self.ui.lb_deviance.setMinimumHeight(800)
-        self.ui.view_prediction_res.setMinimumHeight(700)
+        #self.ui.lb_deviance.setMinimumWidth(self.ui.sw_content.width() - 20)
+        #self.ui.lb_deviance.setMinimumHeight(800)
+        self.ui.view_prediction_res.setMinimumHeight(1500)
         self.ui.view_prediction_res.setMinimumWidth(self.ui.sw_content.width() - 20)
 
         # page 4 content size
         self.ui.view_prediction.setMinimumWidth(self.ui.sw_content.width() - 20)
+        self.ui.view_prediction.setMinimumHeight(1400)
 
         self.showMaximized()
         self.show()
@@ -146,7 +147,7 @@ class ML(QMainWindow):
 
     def load_house_data(self,filename):
         dm = dataManager()
-        self.raw_features, list_data = dm.loadRawData(filename, 4)
+        self.raw_features, list_data = dm.loadRawData(filename, 9)
         model_data = HousePriceModel(self, self.raw_features, list_data)
         self.ui.view_data.setModel(model_data)
 
@@ -253,30 +254,31 @@ class ML(QMainWindow):
         self.ui.sw_content.setCurrentIndex(2)
         self.y_pred = self.prediction_model.predict(self.x_test)
         score = self.prediction_model.score(self.x_test,self.y_test)
+        self.ui.lb_score.setText('Prediction Score : %.2f' % float(score))
 
-        self.ui.lb_score.setText('Prediction Score : %s' % score)
+        # do not display deviance figure
+        if 0:
+            # compute test set deviance
+            test_score = self.prediction_model.test_score(self.x_test, self.y_test)
+            train_score = self.prediction_model.train_score()
 
-        # compute test set deviance
-        test_score = self.prediction_model.test_score(self.x_test,self.y_test)
-        train_score = self.prediction_model.train_score()
+            plt.title('Deviance')
+            plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, train_score, 'b-',
+                     label='Training Set Deviance')
+            plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, test_score, 'r-',
+                     label='Test Set Deviance')
+            plt.legend(loc='upper right')
+            plt.xlabel('Boosting Iterations')
+            plt.ylabel('Deviance')
+            plt.savefig('Images\\divance.jpg')
 
-        plt.title('Deviance')
-        plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, train_score, 'b-',
-                 label='Training Set Deviance')
-        plt.plot(np.arange(self.prediction_model.mn_estimators) + 1, test_score, 'r-',
-                 label='Test Set Deviance')
-        plt.legend(loc='upper right')
-        plt.xlabel('Boosting Iterations')
-        plt.ylabel('Deviance')
-        plt.savefig('Images\\divance.jpg')
-
-        pixmap = QPixmap('Images\\divance.jpg')
-        self.ui.lb_deviance.setPixmap(pixmap.scaled(1200, 800))
+            pixmap = QPixmap('Images\\divance.jpg')
+            self.ui.lb_deviance.setPixmap(pixmap.scaled(1200, 800))
 
         #prediction data
-        headers = ['House Price', 'Prediction Price', 'Difference']
+        headers = ['House Price', 'Prediction Price', 'Difference', 'Diff Percentage']
         list_data = []
-        for i in range(10):
+        for i in range(20):
             list_data.append([self.y_test.values[i], self.y_pred[i]])
         model_validation = ValidationModel(self,headers,list_data)
         self.ui.view_prediction_res.setModel(model_validation)
@@ -285,9 +287,11 @@ class ML(QMainWindow):
     def house_price_prediction(self):
         self.ui.sw_content.setCurrentIndex(3)
 
-        headers = ['Predicted','Price']
+        headers = ['Predicted Price',]
         for x in self.selected_features:
             headers.append(x)
+
+        print(headers)
 
         list_data = [''] * len(headers)
         model_prediction = PredictionModel(self, headers,list_data)
@@ -297,7 +301,7 @@ class ML(QMainWindow):
     @pyqtSlot()
     def calc_price(self):
         m = self.ui.view_prediction.model()
-        user_data = m.list_data[2:]
+        user_data = m.list_data[1:]
         x_test_user = pd.DataFrame([user_data],columns=self.selected_features)
         y_pred_user = self.prediction_model.predict(x_test_user)
         m.update_predicted_price(y_pred_user[0])

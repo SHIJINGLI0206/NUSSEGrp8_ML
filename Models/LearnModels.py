@@ -37,6 +37,16 @@ class GradientBoostingRegressor:
     def train_score(self):
         return self.clf.train_score_
 
+class SVM:
+    def __init__(self, X, y, kernelType, cost=1.0):
+        self.clf = svm.SVR(C=cost, kernel=kernelType)
+        self.clf.fit(X, y.as_matrix())
+
+    def predict(self, X):
+        return self.clf.predict(X)
+
+    def score(self, X, y):
+        return self.clf.score(X, y.as_matrix())
 
 class LinearRegModel:
     def __init__(self, X, y):

@@ -15,7 +15,7 @@ def gradient_descent_model_test():
     print('\n\n')
     print('Start training data in SGD regression model')
 
-    model_sgd = GradientDescentModel(n_iter=1000, eta0=0.6, penalty='l1')
+    model_sgd = GradientDescentModel(n_iter=1000, eta0=0.3, penalty='l1')
     model_sgd.train(X_train, y_train)
     y_pred , mse= model_sgd.predict(X_test, y_test)
     score = model_sgd.score(X_test, y_test)

@@ -63,21 +63,23 @@ class LinearRegModel:
 
 
 class GradientDescentModel:
-    def __init__(self, X, y, coef_init=None, intercept_init=None):
-        self.regr = linear_model.SGDRegressor(n_iter=1000, eta0=0.003)
-        self.regr.fit(X,y, coef_init, intercept_init)
+    def __init__(self,n_iter=1000, eta0=0.6, penalty='l1'):
+        self.model_sgd = linear_model.SGDRegressor(n_iter=n_iter,eta0=eta0,penalty=penalty)
 
-    def predict(self, X):
-        #return predicted values
-        return self.regr.predict(X)
+    def train(self, x_train, y_train):
+        t_curr = str(datetime.now())
+        print('\nSGD Regression Start Training: %s' % t_curr)
+        self.model_sgd.fit(x_train, y_train)
+        t_curr = str(datetime.now())
+        print('\nSGD Regression End Training: %s ' % t_curr)
 
-    def score(self, X, y):
-        return self.regr.score(X, y)
+    def predict(self, x_test, y_test):
+        y_pred = self.model_sgd.predict(x_test)
+        mse = mean_squared_error(y_test, y_pred) ** 0.5
+        return y_pred, mse
 
-    def toString(self):
-        print (self.regr.n_iter)
-        print (self.regr.coef_)
-        print (self.regr.intercept_)
+    def score(self, x_test, y_test):
+        return self.model_sgd.score(x_test, y_test)
 
 
 class LogRegModel:
